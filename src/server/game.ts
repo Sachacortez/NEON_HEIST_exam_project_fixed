@@ -137,10 +137,6 @@ function getCell(state: GameState, position: { x: number; y: number }): Cell | u
   return state.board.cells.find((cell) => cell.x === position.x && cell.y === position.y);
 }
 
-function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
-  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-}
-
 function movePosition(position: { x: number; y: number }, direction: Direction): { x: number; y: number } {
   const next = { ...position };
   if (direction === 'UP') next.y -= 1;
@@ -243,8 +239,9 @@ export function applyAction(request: ActionRequest): GameState {
   }
 
   if (request.action === 'ATTACK') {
-    if (distance(player.position, opponent.position) > 2 || samePosition(player.position, opponent.position)) {
-      throw new Error('Ataque inválido: el rival debe estar a distancia Manhattan de 2 o menos.');
+    const sameRowOrColumn = player.position.x === opponent.position.x || player.position.y === opponent.position.y;
+    if (!sameRowOrColumn || samePosition(player.position, opponent.position)) {
+      throw new Error('Ataque inválido: el rival debe estar en la misma fila o columna.');
     }
     player.energy -= cost;
     const damage = opponent.defending ? 1 : 2;
